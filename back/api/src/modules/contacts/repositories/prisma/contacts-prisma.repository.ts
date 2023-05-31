@@ -22,12 +22,6 @@ export class ContactsPrismaRepository implements ContactsRepository {
     const contact = await this.prisma.contact.findUnique({ where: { id } });
     return contact;
   }
-  // private groupby(contacts: Contact[], key: string) {
-  //   return contacts.reduce((acc, cur) => {
-  //     (acc[cur[key]] = acc[cur[key]] || []).push(cur);
-  //     return acc;
-  //   });
-  // }
 
   async findByName(name: string) {
     return await this.prisma.contact.findFirst({where: {name}})
@@ -35,7 +29,6 @@ export class ContactsPrismaRepository implements ContactsRepository {
 
   async findAll(name:string): Promise<object | Contact[]> {
     const contacts = await this.prisma.contact.findMany();
-    console.log('oi', name)
     if (name) {
       return this.findByName(name)
     }
