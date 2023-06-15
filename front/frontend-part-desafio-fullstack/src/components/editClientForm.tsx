@@ -1,7 +1,7 @@
 import React from "react";
 import { TextField } from "@mui/material";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { clientData, clientSchema } from "../pages/schemas/contacts.schema";
+import { EditClientData, editClientSchema } from "../pages/schemas/contacts.schema";
 import { useAuth } from "../contexts/authContext";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -10,11 +10,12 @@ function EditClientForm() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<clientData>({
-    resolver: zodResolver(clientSchema),
+  } = useForm<EditClientData>({
+    resolver: zodResolver(editClientSchema),
   });
   const { editClient, isEditing } = useAuth();
-  const onFormEditSubmit: SubmitHandler<clientData> = (formData) => {
+  const onFormEditSubmit: SubmitHandler<EditClientData> = (formData) => {
+    
     editClient(formData)
     console.log(formData);
   };

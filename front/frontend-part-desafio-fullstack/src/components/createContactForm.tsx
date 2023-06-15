@@ -1,7 +1,7 @@
 import React from "react";
 import { TextField } from "@mui/material";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { clientData, clientSchema } from "../pages/schemas/contacts.schema";
+import { CreateContactData, createContactSchema } from "../pages/schemas/contacts.schema";
 import { useAuth } from "../contexts/authContext";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -10,11 +10,11 @@ function CreateContactForm() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<clientData>({
-    resolver: zodResolver(clientSchema),
+  } = useForm<CreateContactData>({
+    resolver: zodResolver(createContactSchema),
   });
-  const { createContact, isEditing } = useAuth();
-  const onFormCreateContactSubmit: SubmitHandler<clientData> = (formData) => {
+  const { createContact, isCreating } = useAuth();
+  const onFormCreateContactSubmit: SubmitHandler<CreateContactData> = (formData) => {
     createContact(formData)
     console.log(formData);
   };
@@ -59,9 +59,9 @@ function CreateContactForm() {
       <button
         type="submit"
         className="border border-black rounded p-1 hover: cursor-pointer"
-        disabled={isEditing}
+        disabled={isCreating}
       >
-        {isEditing ? "Editando..." : "Editar"}
+        {isCreating ? "Criando..." : "Criar"}
       </button>
     </form>
   );

@@ -1,6 +1,11 @@
-import { clientData, contactData, createContactData } from "@/pages/schemas/contacts.schema";
-import { LoginData, UserData } from "@/pages/schemas/user.schema";
-import api from "@/pages/services/api";
+import {
+  ClientData,
+  ContactData,
+  CreateContactData,
+  EditClientData,
+} from "../pages/schemas/contacts.schema";
+import { LoginData, UserData } from "../pages/schemas/user.schema";
+import api from "../pages/services/api";
 import { useRouter } from "next/router";
 import { parseCookies, setCookie } from "nookies";
 import React, { createContext, ReactNode, useContext, useState } from "react";
@@ -14,21 +19,34 @@ interface Props {
 interface authProviderData {
   registerClient: (userData: UserData) => void;
   loginClient: (loginData: LoginData) => void;
-  editClient: (clientData: clientData) => void;
-  createContact: (contactData: clientData) => void;
+  editClient: (clientData: ClientData) => void;
+  createContact: (contactData: CreateContactData) => void;
+  getClient: () => void;
+  getContactList:() => void;
   isEditing: boolean;
+  isCreating: boolean;
   modalEditClient: boolean;
   setModalEditClient: React.Dispatch<React.SetStateAction<boolean>>;
   modalCreateContact: boolean;
   setModalCreateContact: React.Dispatch<React.SetStateAction<boolean>>;
+  client: ClientData;
+  contactList: ContactData[];
 }
 
 const AuthContext = createContext<authProviderData>({} as authProviderData);
 
 function AuthProvider({ children }: Props) {
   const [isEditing, setIsEditing] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
   const [modalEditClient, setModalEditClient] = useState(false);
   const [modalCreateContact, setModalCreateContact] = useState(false);
+  const [contactList, setContactList] = useState<ContactData[]>([]);
+  const [client, setClient] = useState<ClientData>({
+    id: "",
+    name: "",
+    email: "",
+    telefone: ''
+  });
 
   const cookies = parseCookies();
   const token = cookies.token;
@@ -73,29 +91,53 @@ function AuthProvider({ children }: Props) {
       });
   };
 
-  const createContact = (contactData: createContactData) => {
-    api
-      .post("/contacts", contactData, {
+  const getClient = async () => {
+    try {
+      const loggedClient = await api.get<ClientData>(`/clients/${idClient}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      })
-      .then(() => {
-        toast.success("login realizado com sucesso!");
-        router.push("/home");
-      })
-      .then(() => {
-        setModalCreateContact(false);
-      })
-      .catch((err) => {
-        console.log(err);
-        toast.error(
-          "Erro ao cadastrar, verifique os dados fornecidos."
-        );
       });
+      setClient(loggedClient.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const getContactList = async () => {
+    try {
+      const contacts = await api.get<ContactData[]>("/contacts", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const filteredContacts = contacts.data.filter(
+        (contact) => contact.clientId == idClient
+      );
+      setContactList(filteredContacts);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
-  const editClient = async (clientData: clientData) => {
+  const createContact = async (contactData: CreateContactData) => {
+    setIsCreating(true);
+    try {
+      await api.post("/contacts", contactData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      toast.success("Contato cadastrado com sucesso!");
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setModalCreateContact(false);
+      setIsCreating(false);
+      getContactList()
+    }
+  };
+
+  const editClient = async (clientData: EditClientData) => {
     setIsEditing(true);
     try {
       await api.patch(`/clients/${idClient}`, clientData, {
@@ -106,6 +148,8 @@ function AuthProvider({ children }: Props) {
     } catch (error) {
     } finally {
       setIsEditing(false);
+      setModalEditClient(false);
+      getClient()
     }
   };
 
@@ -119,12 +163,17 @@ function AuthProvider({ children }: Props) {
         registerClient,
         loginClient,
         editClient,
+        getClient,
         isEditing,
         modalEditClient,
         setModalEditClient,
         modalCreateContact,
         setModalCreateContact,
-        createContact
+        createContact,
+        isCreating,
+        client,
+        contactList,
+        getContactList
       }}
     >
       {children}

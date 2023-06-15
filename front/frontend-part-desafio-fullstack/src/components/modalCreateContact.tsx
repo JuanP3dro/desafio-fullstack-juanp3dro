@@ -1,5 +1,3 @@
-import React from "react";
-import EditClientForm from "./editClientForm";
 import { AiOutlineClose } from "react-icons/ai";
 import { useAuth } from "@/contexts/authContext";
 import CreateContactForm from "./createContactForm";

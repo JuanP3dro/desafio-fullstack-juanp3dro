@@ -1,11 +1,11 @@
-import { contactData } from '@/pages/schemas/contacts.schema'
+import { ContactData } from '@/pages/schemas/contacts.schema'
 import React from 'react'
 import { IoIosContact } from 'react-icons/io'
 import{BsTelephoneFill} from 'react-icons/bs'
 import {MdEmail} from 'react-icons/md'
 
 interface ICardProps {
-    contact:contactData
+    contact:ContactData
 }
 
 function Card({contact}: ICardProps) {
